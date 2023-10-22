@@ -1,0 +1,200 @@
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<title>Design</title>
+<header>Form Designer</header>
+    <style>
+        .container{
+            display: flex;
+            height: 100%;
+            width: 100%;
+            background-color: white;
+        }
+        .left_tab{
+            border: 1px solid;
+            height: 100%;
+            width: 15%;
+            background-color: #255783;
+        }
+        .right_tab{
+    
+            height: 90%;
+            width: 80%;
+            background-color: white;
+            padding: 1%;
+        }
+        .button_div{
+            display: flex;
+            border: 0px solid;
+            height: 5%;
+            width: 100%;
+            background-color: white;
+            justify-content: right;
+            padding: 10px;
+            margin-left: -10px;
+        }
+        .design_tab{
+            border: 1px solid;
+            height: 92%;
+            width: 100%;
+            background-color: white;
+            justify-content: right;
+        }
+    
+        /*a:link, a:visited {
+            background-color: #1bf5c3;
+            color: white;
+            padding: 5px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;*/
+        }
+        .btn_pre{
+            background-color: #fff;
+            color: #000;
+            padding: 5px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-color: #d1ffff;
+        }
+        .draggable-element {
+            cursor: grab;
+            padding: 10px;
+            border: 1px solid #000;
+            margin: 10px;
+        }
+
+        #designer-canvas {
+            position: relative;
+            
+        }
+        .layout-container {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: lightblue;
+            border: 2px solid #000;
+        }
+
+        .draggable-element i {
+         font-size: 18px; 
+         margin-right: 10px; 
+         }
+        .draggable-element i.fa-th-large { 
+         color: #3498db; 
+         }
+        .draggable-element i.fa-font { 
+         color: #2ecc71; 
+         }
+        .draggable-element i.fa-check-square { 
+         color: #e74c3c; 
+         }
+
+         .draggable-element i.fa-dot-circle { 
+         color: #f39c12;
+          }
+         .draggable-element i.fa-table { 
+        color: #9b59b6; 
+        }
+        .draggable-element i.fa-external-link-alt { 
+         color: #e67e22; 
+        }
+        .draggable-element i.fa-caret-down { 
+         color: #1abc9c; 
+        }
+        </style>
+        </head>
+        <body>
+        <div class="container">
+        <div class="left_tab" id="sidebar">
+        <div class="draggable-element" draggable="true" id="layout" onclick="addObject('layout')">
+          <i class="fas fa-th-large"></i> Layout
+          </div>
+          <div class="draggable-element" draggable="true" id="button" onclick="addObject('button')">
+          <i class="fas fa-square"></i> Button
+          </div>
+          <div class="draggable-element" draggable="true" id="textbox" onclick="addObject('textbox')">
+          <i class="fas fa-font"></i> Text Box
+          </div>
+         <div class="draggable-element" draggable="true" id="checkbox" onclick="addObject('checkbox')">
+         <i class="far fa-check-square"></i> Checkbox
+         </div>
+
+        <div class="draggable-element" draggable="true" id="radio" onclick="addObject('radio')">
+        <i class="far fa-circle"></i> Radio Button
+         </div>
+
+        <div class="draggable-element" draggable="true" id="table" onclick="addObject('table')">
+        <i class="fas fa-table"></i> Table
+        </div>
+
+       <div class="draggable-element" draggable="true" id="link" onclick="addObject('link')">
+       <i class="fas fa-external-link-alt"></i> Navigation Link
+       </div>
+       <div class="draggable-element" draggable="true" id="dropdown" onclick="addObject('dropdown')">
+       <i class="fas fa-caret-down"></i> Dropdown
+        </div>
+        </div>
+        <div class="right_tab">
+            <div class="button_div">
+                <a href="default.asp" target="_blank">Publish</a>&nbsp&nbsp&nbsp
+                <button class="btn_pre"  type="button">Preview</button>
+            </div>
+            <div class="design_tab" id="designer-canvas"></div>
+            </div>
+            </div>
+             <script>
+            document.addEventListener("DOMContentLoaded", function() {
+            const sidebar = document.getElementById("sidebar");
+            const designerCanvas = document.getElementById("designer-canvas");
+
+            let dragElement = null;
+
+            
+            function handleDragStart(e) {
+                dragElement = e.target;
+                e.dataTransfer.setData("text/plain", dragElement.innerText);
+            }
+            function handleDragOver(e) {
+                e.preventDefault();
+            }
+            function handleDrop(e) {
+            e.preventDefault();
+            const data = e.dataTransfer.getData("text/plain");
+            if (dragElement) {
+                    
+const label = document.createElement("div");
+                    label.innerText = data;
+                    label.classList.add("draggable-label");
+                    label.style.position = "absolute";
+                    label.style.left = e.clientX - designerCanvas.getBoundingClientRect().left + "px";
+                    label.style.top = e.clientY - designerCanvas.getBoundingClientRect().top + "px";
+                    designerCanvas.appendChild(label);
+                    dragElement = null;
+                }
+            }
+            function handleLayoutDrop(e) {
+                e.preventDefault();
+                if (dragElement) {
+                    const layout = document.createElement("div");
+                    layout.classList.add("layout-container");
+                    layout.style.position = "absolute";
+                    layout.style.left = e.clientX - designerCanvas.getBoundingClientRect().left + "px";
+                    layout.style.top = e.clientY - designerCanvas.getBoundingClientRect().top + "px";
+                    designerCanvas.appendChild(layout);
+                    dragElement = null;
+                }
+            }
+
+        
+            sidebar.addEventListener("dragstart", handleDragStart);
+            designerCanvas.addEventListener("dragover", handleDragOver);
+            designerCanvas.addEventListener("drop", handleDrop);
+            designerCanvas.addEventListener("dragover", handleDragOver);
+            designerCanvas.addEventListener("drop", handleLayoutDrop);
+        });
+    </script>
+</body> 
+ 
