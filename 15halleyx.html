@@ -1,0 +1,241 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design</title>
+    <style>
+        .container{
+            display: flex;
+            height: 100%;
+            width: 100%;
+            background-color: white;
+        }
+        .left_tab{
+            border: 1px solid;
+            height: 100%;
+            width: 15%;
+
+            background-color: #255783;
+        }
+        .right_tab{
+            /* border: 0px solid; */
+            height: 90%;
+            width: 80%;
+            background-color: white;
+            padding: 1%;
+        }
+        .button_div{
+            display: flex;
+            border: 0px solid;
+            height: 5%;
+            width: 100%;
+            background-color: white;
+            justify-content: right;
+            padding: 10px;
+            margin-left: -10px;
+        }
+        .design_tab{
+            border: 1px solid;
+            height: 92%;
+            width: 100%;
+            background-color: white;
+            justify-content: right;
+        }
+        #canvas-container {
+            position: relative;
+            border: 1px solid #000;
+            width: 100%;
+            height: 92%;
+        }
+        .draggable {
+            position: absolute;
+            cursor: pointer;
+        }
+        a:link, a:visited {
+            background-color: #1bf5c3;
+            color: white;
+            padding: 5px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn_pre{
+            background-color: #fff;
+            color: #000;
+            padding: 5px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-color: #d1ffff;
+        }
+        .draggable-element {
+            cursor: grab;
+            padding: 10px;
+            border: 1px solid #000;
+            margin: 10px;
+        }
+
+        .layout-container {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: lightblue;
+            border: 2px solid #000;
+        }
+        .toast {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="toast" class="toast"></div>
+        <div class="left_tab" id="sidebar">
+            <h2>Form designer</h2>
+            <div class="draggable-element" draggable="true" id="layout" ondragstart="addObject('table')">Layout</div>
+            <div class="draggable-element" draggable="true" id="text" ondragstart="addObject('text')">Label</div>
+            <div class="draggable-element" draggable="true" id="button" ondragstart="addObject('button')">Button</div>
+            <div class="draggable-element" draggable="true" id="dropdown" ondragstart="addObject('dropdown')">Drop down</div>
+            <div class="draggable-element" draggable="true" id="text" ondragstart="addObject('text')">check box</div>
+            <div class="draggable-element" draggable="true" id="table" ondragstart="addObject('table')">Table</div>
+            <div class="draggable-element" draggable="true" id="link" ondragstart="addObject('link')">Navigation link</div>
+            <div class="draggable-element" draggable="true" id="image" ondragstart="addObject('image')">Image</div>
+            <div class="draggable-element" draggable="true" id="text" ondragstart="addObject('text')">Ratio button</div>
+      </div>
+        <div class="right_tab">
+            <div class="button_div">
+                <a href="default.asp" target="_blank">Publish</a>&nbsp&nbsp&nbsp
+                <button class="btn_pre"  type="button">Preview</button>
+            </div>
+            <div id="canvas-container">
+                <canvas id="myCanvas" width="600" height="600" ></canvas>
+                <button class="btn_pre"  type="button" onclick="reset()">Reset</button>
+                <button class="btn_pre"  type="button" onclick="showToast('Saved successfully!!!');">Save</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        var objects = [];
+        var selectedObject = null;
+
+        function drawObjects() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            objects.forEach(function(obj) {
+                if (obj.type === "text") {
+                    ctx.font = "20px Arial";
+                    ctx.fillText(obj.content, obj.x, obj.y);
+                } else if (obj.type === "image") {
+                    var img = new Image();
+                    img.src = obj.content;
+                    img.onload = function() {
+                        ctx.drawImage(img, obj.x, obj.y, 100, 100);
+                    };
+                } else if (obj.type === "radio") {
+                    ctx.font = "14px Arial";
+                    ctx.fillText("◉", obj.x, obj.y); // Bullet symbol
+                    ctx.fillText(obj.content, obj.x + 20, obj.y + 8);
+                } else if (obj.type === "dropdown") {
+                    ctx.font = "16px Arial";
+                    ctx.fillText("▼", obj.x, obj.y); // Dropdown symbol
+                    ctx.fillText(obj.content, obj.x + 20, obj.y + 10);
+                } else if (obj.type === "button") {
+                    ctx.fillStyle = "aqua";
+                    ctx.fillRect(obj.x, obj.y, 100, 40);
+                    ctx.font = "16px Arial";
+                    ctx.fillStyle = "aqua";
+                    ctx.fillText(obj.content, obj.x + 10, obj.y + 25);
+                } else if (obj.type === "label") {
+                    ctx.font = "16px Arial";
+                    ctx.fillText(obj.content, obj.x, obj.y);
+                } else if (obj.type === "table") {
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(obj.x, obj.y, 200, 200);
+                    ctx.strokeStyle = "black"; 
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(obj.x, obj.y, 200, 200);
+                    ctx.font = "16px Arial";
+                    ctx.fillStyle = "black";
+                    ctx.fillText("Table", obj.x + 80, obj.y + 50);
+                } else if (obj.type === "link") {
+                    ctx.font = "16px Arial";
+                    ctx.fillStyle = "blue";
+                    ctx.fillText("Link", obj.x, obj.y);
+                }
+            });
+        }
+
+        function addObject(e) {
+            var objectType = e
+            console.log("eee-->",e)
+            console.log("objectType-->",objectType)
+            var objectContent = prompt("Enter object content:");
+            if (objectContent) {
+                var newObj = {
+                    type: objectType,
+                    content: objectContent,
+                    x: Math.random() * (canvas.width - 100),
+                    y: Math.random() * (canvas.height - 100),
+                };
+                objects.push(newObj);
+                drawObjects();
+            }
+        }
+
+        document.getElementById("addObject").addEventListener("click", addObject);
+
+        function handleMouseDown(e) {
+            var mouseX = e.clientX - canvas.getBoundingClientRect().left;
+            var mouseY = e.clientY - canvas.getBoundingClientRect().top;
+            
+            objects.forEach(function(obj) {
+                if (mouseX >= obj.x && mouseX <= obj.x + 100 && mouseY >= obj.y && mouseY <= obj.y + 100) {
+                    selectedObject = obj;
+                    selectedObject.offsetX = mouseX - obj.x;
+                    selectedObject.offsetY = mouseY - obj.y;
+                }
+            });
+        }
+
+        function handleMouseUp() {
+            selectedObject = null;
+        }
+
+        function handleMouseMove(e) {
+            if (selectedObject) {
+                selectedObject.x = e.clientX - canvas.getBoundingClientRect().left - selectedObject.offsetX;
+                selectedObject.y = e.clientY - canvas.getBoundingClientRect().top - selectedObject.offsetY;
+                drawObjects();
+            }
+        }
+
+        canvas.addEventListener("mousedown", handleMouseDown);
+        canvas.addEventListener("mousemove", handleMouseMove);
+        canvas.addEventListener("mouseup", handleMouseUp);
+
+        drawObjects();
+        function reset(){
+            location.reload();
+        }
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.style.display = "block";
+
+            setTimeout(function() {
+                toast.style.display = "none";
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
